@@ -1,0 +1,142 @@
+---
+title: "Allocation Actifs Portefeuille"
+author: "Julien Riton"
+date: "10 décembre 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+# Allocation d'actifs dans un portefeuille
+
+Nous suivons l'article de Natixis "ALLOCATION MULTI ACTIFS" ([NAT]) et l'article de William F. Sharpe datant de 1963 "A SIMPLIFIED MODEL FOR PORTFOLIO ANALYSIS" ([SHP]).
+
+Pour les résultats affichés dans cette page depuis les calculs fait dans R, veuillez exécuter le script study1.R en cas de non affichage. Ce dernier script est en principe sourcé depuis ce présent fichier Rmd avec le bouton Knit HTML. Installer au préalable le package Rmarkdown.
+```{r eval=TRUE, echo=FALSE}
+source(file = "study1.R", encoding = "UTF-8")
+```
+
+En page 4 de [NAT], il est fait mention de la non-normalité des rendements. Ce que l'on cherche à attester sur quelques valeurs telles que l'or (AUX) ou l'argent (AGX)
+
+## Rendement
+
+Nous considérons comme définition du rendement:
+
+si $(c_t)_{t=0,...,N}$ est la série temporelle représentant le cours d'une valeur, alors le rendement en $t=1,...,N$ est $r_t=\dfrac{c_t-c_{t-1}}{c_{t-1}}$.
+
+
+
+
+### distribution du rendement de l'or
+Dans un premier temps, nous regardons la distribution sur 20 ans des rendements mensuels de l'or.
+
+Les cours sont données en $US depuis la page internet <https://www.bullionvault.com/gold-price-chart.do>
+
+
+```{r echo=FALSE}
+hist(gold.return.20y, freq=F, main = "Distribution du rendement mensuel de l'or sur 20 ans")
+```
+
+L'histogramme nous informe quelque peu sur une éventuelle distribution gaussienne. Nous réalisons alors un test de Shapiro:
+
+```{r echo=FALSE}
+shapiro.test(gold.return.20y)
+```
+
+La p-value est largement inférieur au seuil habituel de 5% (risque de se tromper en retenant la normalité). Ainsi, nous ne rejetons pas l'hypothèse de normalité.
+
+Conclusion: le rendement suit une distribution gaussienne au vue du précédent jeu de données concernant son cours sur 20 ans. Nous arrivons à la même conclusion avec un jeu de données décadiques sur 5 ans.
+
+
+### distribution du rendement de l'argent
+
+```{r echo=FALSE}
+hist(silver.return.20y, freq=F, main = "Distribution du rendement mensuel de l'argent sur 20 ans")
+```
+
+```{r echo=FALSE}
+shapiro.test(silver.return.20y)
+```
+
+
+Du cours de l'or et de l'argent, nous constatons qu'il y a gaussianité. Peut-être sont-elles des valeurs particulères.
+
+### distribution du rendement du pétrole
+<http://www.bdm.insee.fr/bdm2/affichageSeries?idbank=001565198&page=tableau&request_locale=fr>
+```{r echo=FALSE}
+hist(oil.return, freq=FALSE)
+```
+
+
+```{r echo=FALSE}
+shapiro.test(oil.return)
+```
+
+Encore ici, la p-value est nettement inférieure au risque de 5%.
+
+```{r echo=FALSE}
+qqnorm(oil.return)
+```
+
+
+### distribution du rendement de Renault
+<https://www.euronext.com/fr/products/equities/FR0000131906-XPAR>
+```{r echo=FALSE}
+hist(RNO.return)
+```
+
+
+```{r echo=FALSE}
+shapiro.test(RNO.return)
+```
+
+Encore ici, la p-value est nettement inférieure au risque de 5%.
+
+```{r echo=FALSE}
+qqnorm(RNO.return)
+```
+## Risque
+Pour la notion générale de risque, voir <http://www.bnains.org/risque/risque.php#mesure,>
+
+
+
+## Copules
+Dans [NAT], il est fait mention de copules page 10.
+Entamons une étude d'après l'article (en anglais) de Wikipedia.
+<https://en.wikipedia.org/wiki/Copula_(probability_theory)>
+
+Considérons la première définition donnée: "distribution multivariée pour laquelle les marginales sont uniformes".
+Fonction copule C est définie par
+$$C(u_1,...,u_d)=\mathbb{P}\left[X_1\leq F_1^{-1}(u_1),...,X_d\leq F_d^{-1}(u_d)\right]$$
+
+Nous allons jouer avec les distributions données par le rendement de l'or et de l'argent.
+
+Premièrement, suivent leurs fonctions de répartitions empiriques:
+```{r echo=FALSE}
+plot(Fn.gold, main="Fct répartition empirique du rendement de l'or")
+plot(Fn.silver, main="Fct répartition empirique du rendement de l'argent")
+```

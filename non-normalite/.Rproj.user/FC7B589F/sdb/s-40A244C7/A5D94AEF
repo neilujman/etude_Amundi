@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# study of the rendement of the gold over 20 years\n# data from https://www.bullionvault.com/gold-price-chart.do\ndatas.20y <- read.csv(file = \"datas/AUX-USD-20y.csv\", header = T)\n\n# warning : trend are sorted descending\ngold.trend.high.20y <- datas.20y$High..troy.oz.\n# we reordering by ascent order\ngold.trend.high.20y <- gold.trend.high.20y[240:1]\n\n# there 240 monthly observations\n# we compute the monthly return\ngold.return.20y <- diff(gold.trend.high.20y)/head(gold.trend.high.20y, n=239)\n\n# we plot the distribution of the return\nhist(gold.return.20y, freq=F)\n# we test the normality\nshapiro.test(gold.return.20y) # p-value = 0.06167\n# Sachant que l'hypothèse nulle est que la population est normalement distribuée, \n# si la p-value est inférieure au niveau alpha choisi, alors l'hypothèse nulle est rejetée \n# (i.e. on conclut que les données ne sont pas issues d'une population normalement distribuée). \n# Si la p-value est supérieure au niveau alpha choisi, alors on ne peut pas rejeter l'hypothèse nulle \n# selon laquelle les données sont issues d'une population normalement distribuée.\n\n# we attest the normality\nqqnorm(gold.return.20y)\n\n\n\n\n\ndatas.5y <- read.csv(file = \"datas/AUX-USD-5y.csv\", header = T)\n# warning : trend are sorted descending\ngold.trend.high.5y <- datas.5y$High..troy.oz.\n# we reordering by ascent order\ngold.trend.high.5y <- gold.trend.high.5y[180:1]\n\n# there 180 monthly observations\n# we compute the decadayly return\ngold.return.5y <- diff(gold.trend.high.5y)/head(gold.trend.high.5y, n=179)\n\n# we plot the distribution of the return\nhist(gold.return.5y, freq=F)\nshapiro.test(gold.return.5y) # p-value = 0.06167\nqqnorm(gold.return.5y)\n\n\n\n# study of the rendement of the silver over 20 years\n# data from https://www.bullionvault.com/gold-price-chart.do\ndatas.20y <- read.csv(file = \"datas/AGX-USD-20y.csv\", header = T)\n\n# warning : trend are sorted descending\nsilver.trend.high.20y <- datas.20y$High..troy.oz.\n# we reordering by ascent order\nsilver.trend.high.20y <- silver.trend.high.20y[240:1]\n\n# there 240 monthly observations\n# we compute the monthly return\nsilver.return.20y <- diff(silver.trend.high.20y)/head(silver.trend.high.20y, n=239)\n\n# we plot the distribution of the return\nhist(silver.return.20y, freq=F)\n\n# we test the normality\nshapiro.test(silver.return.20y) \n# p-value = 5.459e-06\n# we reject the normality hypothesis\n\n# # we confirm the non-normality\n# qqnorm(silver.return.20y)\n\n\n\n",
+    "created" : 1481315701383.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1321213888",
+    "id" : "A5D94AEF",
+    "lastKnownWriteTime" : 1481318810,
+    "last_content_update" : -2147483648,
+    "path" : "~/Documents/mathematiques/assetManagement/non-normalite/study1.R",
+    "project_path" : "study1.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
