@@ -131,9 +131,15 @@ integrate.dens <- function(a, b, x.grid, y.grid, val){
     ind.a <- abs(rep(a,nx)- x.grid) %>% which.min(.)
     ind.b <- abs(rep(b,ny)- y.grid) %>% which.min(.)
     # we put off point near the boundary to prevent boundary effect
-    if(ind.a <= 2 || ind.b <= 2){
-        return(0)
+    if(ind.a < 2 || ind.b < 2 || ind.a >= nx || ind.b >= ny){
+        return(NA)
+    }else{
+        S=0
+        area=outer(diff(x.grid), diff(y.grid), FUN= "*")
+        f.val <- val[,-1]
+        f.val <- f.val[-1,]
+        S <- sum((f.val*area)[1:ind.a,1:ind.b])
+        return(S)
     }
-    # if(ind.a >= (nx-2) || ind)
 }
 
