@@ -119,6 +119,7 @@ Encore ici, la p-value est nettement inférieure au risque de 5%.
 ```{r echo=FALSE}
 qqnorm(RNO.return)
 ```
+
 ## Risque
 Pour la notion générale de risque, voir <http://www.bnains.org/risque/risque.php#mesure,>
 
@@ -140,3 +141,27 @@ Premièrement, suivent leurs fonctions de répartitions empiriques:
 plot(Fn.gold, main="Fct répartition empirique du rendement de l'or")
 plot(Fn.silver, main="Fct répartition empirique du rendement de l'argent")
 ```
+
+Nous estimerons $F_i^{-1}$ avec la fonction quantile de R (<https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html>)
+
+Pour la probabilité conjointe, nous avons une éventuelle solution avec le package ks:
+<https://cran.r-project.org/web/packages/ks/vignettes/kde.pdf>.
+L'utilisation minimaliste de la fonction ks::kde nous donne la distribution jointe suivante:
+
+```{r echo=FALSE}
+plot(join.dens, main="Densité jointe estimé de l'or et de l'argent")
+```
+
+Les contours de régions de densités à 25%, 50% et 75% sont représentées.
+
+
+On peut estimer $\mathbb{P}\left[X_1\leq a, X_2\leq b\right]$ par une méthode élémentaire comme une méthode des rectangles ou du point mileu bidimensionnelle qui sera "simple" à implémenter vue que le domaine d'intégration est rectangle. L'objet issu de ks::kde nous donne le champ eval.point qui représente la grille de points d'évaluation de la densité et le champ estimate qui donne la densité évaluée sur la grille de point. Il faut aussi penser à approcher un point rendu par les quantiles par un point de la grille. Concernant ce dernier point, dans une première version de notre fonction d'intégration, cette approximation n'est pas vectorisable d'où l'usage de boucle for ou au mieux de fonction apply.
+
+### Méthode du rectangle
+Notre grille construite par ks::kde (n'oublions que l'on peut jouer sur cette construction) fournira un pavage de petits rectangles $R_{ij}$. On considèrera alors le coin supérieure droit $C_{ij}$ de chaque $R_{ij}$. Ensuite, nous ferons la somme de tous les produits $f(C_{ij})*S(R_{ij})$ tel que $C_{i,j} \leq (a,b)$. 
+
+
+
+### Ce que l'on veut
+A travers ces calculs, nous voulons vérifier les propriétés d'un copule, à savoir:
+??? par construction C est un copule, mais on veut quand vérifier l'uniformité de marginales.

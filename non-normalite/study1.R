@@ -1,3 +1,5 @@
+library(ks)
+
 # study of the rendement of the gold over 20 years
 # data from https://www.bullionvault.com/gold-price-chart.do
 datas.20y <- read.csv(file = "datas/AUX-USD-20y.csv", header = T)
@@ -98,3 +100,40 @@ RNO.return <- diff(RNO.trend$High)/head(RNO.trend$High,n=222)
 # ================
 Fn.gold <- ecdf(gold.return.20y)
 Fn.silver <- ecdf(silver.return.20y)
+
+
+join.dens <-kde(x=cbind(gold.return.20y,silver.return.20y))
+# plot(join.dens)
+
+x <- join.dens$eval.points[[1]]
+y <- join.dens$eval.points[[2]]
+val <- join.dens$estimate
+
+# in order to find the closest point of the grid from eval.points field of kde object
+# of a given point
+closest.point <- function(x.given, y.given, x.grid, y.grid){
+    xmin <- min(x.grid)
+    xmax <- max(x.grid)
+    ymin <- min(y.grid)
+    ymax <- max(y.grid)
+    x.dist = abs(rep(x.given, length(x.grid)) - x.grid)
+    y.dist = abs(rep(y.given, length(y.grid)) - y.grid)
+    
+    x.candidate <- which.min(x.dist) %>% x.grid[.]
+    y.candidate <- which.min(y.dist) %>% y.grid[.]
+    
+    return(c(x.candidate, y.candidate))
+}
+
+integrate.dens <- function(a, b, x.grid, y.grid, val){
+    nx=length(x.grid)
+    ny=length(y.grid)
+    ind.a <- abs(rep(a,nx)- x.grid) %>% which.min(.)
+    ind.b <- abs(rep(b,ny)- y.grid) %>% which.min(.)
+    # we put off point near the boundary to prevent boundary effect
+    if(ind.a <= 2 || ind.b <= 2){
+        return(0)
+    }
+    # if(ind.a >= (nx-2) || ind)
+}
+
