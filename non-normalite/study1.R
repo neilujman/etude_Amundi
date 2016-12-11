@@ -143,3 +143,26 @@ integrate.dens <- function(a, b, x.grid, y.grid, val){
     }
 }
 
+
+u1 <- seq(0,1, length.out = 100)[-c(1,100)]
+u2 <- seq(0,1, length.out = 100)[-c(1,100)]
+
+a <- quantile(gold.return.20y, probs = u1) %>% array(., dim = length(u1))
+b <- quantile(silver.return.20y, probs = u2) %>% array(., dim = length(u2))
+
+# voir pb avec outer
+#C.val <- outer(a,b, FUN = integrate.dens, x.grid=x, y.grid=y, val = val)
+
+
+bidon <- function(x,y){3*x+y}
+outer(a,b,bidon)
+
+# the nested for are long
+C.val <- matrix(rep(NA,dim(a)*dim(b)), ncol=dim(b))
+for(i in 1:dim(a)){
+    for(j in 1:dim(b)){
+        C.val[i,j]= integrate.dens(a[i],b[j],x,y,val)
+    }
+}
+
+contour(C.val)

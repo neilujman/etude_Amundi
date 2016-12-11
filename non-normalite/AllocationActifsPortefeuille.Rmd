@@ -165,3 +165,9 @@ Notre grille construite par ks::kde (n'oublions que l'on peut jouer sur cette co
 ### Ce que l'on veut
 A travers ces calculs, nous voulons vérifier les propriétés d'un copule, à savoir:
 ??? par construction C est un copule, mais on veut quand vérifier l'uniformité de marginales.
+
+```{r echo=FALSE}
+contour(C.val, main="Ligne de niveau de la fonction copule")
+```
+
+Les valeurs des lignes de niveau correspondent aux marges.
