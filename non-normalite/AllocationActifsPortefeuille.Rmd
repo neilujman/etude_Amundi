@@ -2,7 +2,11 @@
 title: "Allocation Actifs Portefeuille"
 author: "Julien Riton"
 date: "10 décembre 2016"
-output: html_document
+output: 
+    html_document:
+        toc: true
+        number_sections: true
+# runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -31,7 +35,7 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 
 
 
-# Allocation d'actifs dans un portefeuille
+# Objets d'étude
 
 Nous suivons l'article de Natixis "ALLOCATION MULTI ACTIFS" ([NAT]) et l'article de William F. Sharpe datant de 1963 "A SIMPLIFIED MODEL FOR PORTFOLIO ANALYSIS" ([SHP]).
 
@@ -40,9 +44,11 @@ Pour les résultats affichés dans cette page depuis les calculs fait dans R, ve
 source(file = "study1.R", encoding = "UTF-8")
 ```
 
+
+
 En page 4 de [NAT], il est fait mention de la non-normalité des rendements. Ce que l'on cherche à attester sur quelques valeurs telles que l'or (AUX) ou l'argent (AGX)
 
-## Rendement
+# Rendement
 
 Nous considérons comme définition du rendement:
 
@@ -51,7 +57,7 @@ si $(c_t)_{t=0,...,N}$ est la série temporelle représentant le cours d'une val
 
 
 
-### distribution du rendement de l'or
+## Distribution du rendement de l'or
 Dans un premier temps, nous regardons la distribution sur 20 ans des rendements mensuels de l'or.
 
 Les cours sont données en $US depuis la page internet <https://www.bullionvault.com/gold-price-chart.do>
@@ -72,7 +78,7 @@ La p-value est largement inférieur au seuil habituel de 5% (risque de se trompe
 Conclusion: le rendement suit une distribution gaussienne au vue du précédent jeu de données concernant son cours sur 20 ans. Nous arrivons à la même conclusion avec un jeu de données décadiques sur 5 ans.
 
 
-### distribution du rendement de l'argent
+## Distribution du rendement de l'argent
 
 ```{r echo=FALSE}
 hist(silver.return.20y, freq=F, main = "Distribution du rendement mensuel de l'argent sur 20 ans")
@@ -103,7 +109,7 @@ qqnorm(oil.return)
 ```
 
 
-### distribution du rendement de Renault
+## Distribution du rendement de Renault
 <https://www.euronext.com/fr/products/equities/FR0000131906-XPAR>
 ```{r echo=FALSE}
 hist(RNO.return)
@@ -120,12 +126,12 @@ Encore ici, la p-value est nettement inférieure au risque de 5%.
 qqnorm(RNO.return)
 ```
 
-## Risque
+# Risque
 Pour la notion générale de risque, voir <http://www.bnains.org/risque/risque.php#mesure,>
 
 
 
-## Copules
+# Copules 
 Dans [NAT], il est fait mention de copules page 10.
 Entamons une étude d'après l'article (en anglais) de Wikipedia.
 <https://en.wikipedia.org/wiki/Copula_(probability_theory)>
@@ -157,15 +163,17 @@ Les contours de régions de densités à 25%, 50% et 75% sont représentées.
 
 Une incertitude demeure quant à l'évaluation de la densité conjointe: ici, nous avons consiéré l'or et l'argent évalués sur la même plage de temps. Nous avons donc mis en regard deux rendements correspondant à la même date.
 
-On peut estimer $\mathbb{P}\left[X_1\leq a, X_2\leq b\right]$ par une méthode élémentaire comme une méthode des rectangles ou du point mileu bidimensionnelle qui sera "simple" à implémenter vue que le domaine d'intégration est rectangle. L'objet issu de ks::kde nous donne le champ eval.point qui représente la grille de points d'évaluation de la densité et le champ estimate qui donne la densité évaluée sur la grille de point. Il faut aussi penser à approcher un point rendu par les quantiles par un point de la grille. Concernant ce dernier point, dans une première version de notre fonction d'intégration, cette approximation n'est pas vectorisable d'où l'usage de boucle for.
+On peut estimer $\mathbb{P}\left[X_1\leq a, X_2\leq b\right]$ par une méthode élémentaire comme une méthode des rectangles ou du point mileu bidimensionnelle qui sera "simple" à implémenter vue que le domaine d'intégration est rectangle. L'objet issu de `ks::kde` nous donne le champ `eval.point` qui représente la grille de points d'évaluation de la densité et le champ `estimate` qui donne la densité évaluée sur la grille de point. Il faut aussi penser à approcher un point rendu par les quantiles par un point de la grille. 
+
+Concernant ce dernier point, dans une première version de notre fonction d'intégration, cette approximation n'est pas vectorisable d'où l'usage de boucle for.
 De plus, chaque itération de la double boucle recalcule les sommes de Riemann alors qu'une seule fois est nécessaire.
 
-### Méthode du rectangle
+## Méthode du rectangle
 Notre grille construite par ks::kde (n'oublions que l'on peut jouer sur cette construction) fournira un pavage de petits rectangles $R_{ij}$. On considèrera alors le coin supérieure droit $C_{ij}$ de chaque $R_{ij}$. Ensuite, nous ferons la somme de tous les produits $f(C_{ij})*S(R_{ij})$ tel que $C_{i,j} \leq (a,b)$. 
 
 
 
-### Ce que l'on veut
+## Ce que l'on veut
 A travers ces calculs, nous voulons vérifier les propriétés d'un copule, à savoir:
 ??? par construction C est un copule, mais on veut quand même vérifier l'uniformité de marginales.
 
@@ -174,3 +182,80 @@ contour(C.val, main="Ligne de niveau de la fonction copule")
 ```
 
 Les valeurs des lignes de niveau correspondent aux marges. Elles les suivent aux incertitudes de calculs près. 
+
+
+
+# Modèle de Markovitz
+Nous allons encore jouer avec les données sur 20 ans de l'or et de l'argent (et nous regarderons aussi ce même modèle sur les données à 5 ans dans une étude ultérieure à titre comparatif).  
+Nous suivrons [SHP].  
+Selon [NAT], le modèle de Markowitz semble adapter pour le cas de distributions gaussienne, ce qui est notre cas d'après [Rendement](#rendement) .
+$E_1$ est l'espérance du rendement de l'or et $E_2$ celle relative à l'argent.
+$C_{ij}$ est la covariance entre $R_i$ et $R_j$
+```{r echo=FALSE}
+cat("E_1=",mean(gold.return.20y), "\n")
+cat("E_2=",mean(silver.return.20y), "\n")
+cat("Matrice C de covariance: ", cov(cbind(gold.return.20y,silver.return.20y)))
+```
+
+## Portefeuille efficient
+Un portefeuille est efficient si aucun autre portefeuille donne:
+
+* un rendement espéré plus grand et la même variance de rendement ou,
+
+* une plus petite variance de portefeuille et le même rendement espéré.
+
+Le problème devenant:  
+Etant donné un ensemble de prédictions ,  
+déterminer l'ensemble de portefeuille efficient.
+
+## Problème d'optimisation
+$X_i$ est la proportion d'un portefeuille investi dans un titre $i$.
+On obtient
+
+* $E=\sum_i X_i E_i$,
+
+* $V = \sum_i\sum_j X_i X_j C_{ij}$.
+
+La fonction objective étant pour un $\lambda$ donné
+$$\begin{array}{ll}\phi & = \lambda E - V \\ 
+ & =\lambda \sum_i X_i E_i - \sum_i\sum_j X_i X_j C_{ij}
+\end{array}$$
+
+Etant donné $\lambda$, $E_i$ et $C_{ij}$, $\phi$ va évoluer avec $X_i$ soumis aux contraintes suivantes:
+
+1. $\sum_i X_i = 1$, _ie_ tout le portefeuille est investi
+
+2. $X_i \geq 0$, _ie_ qu'il n'y a pas de vente. 
+
+Dans le repère d'axe $(E,V)$, regardons quelle forme à la variété formé paramétré par les $X_i$ assujettis aux conditions précédentes.
+
+Dans le cas de deux titres, nous obtenons un arc de parabole
+```{r echo=FALSE}
+X_1 <- seq(0,1, length.out = 100)
+X_2 <- 1 - X_1
+E = X_1*gold.mean + (1-X_1)*silver.mean
+V = X_1^2 * cov.gs[1,1] + 2*X_1*X_2*cov.gs[2,1] + X_2*cov.gs[2,2]
+plot(E,V)
+```
+
+
+ <!-- ```{r echo=FALSE} -->
+<!-- numericInput("dim.return", "Nombre de titres", 4) -->
+<!-- numericInput("granularity", "Granularité", 100) -->
+<!-- renderPlot({ -->
+<!--     E <- rnorm(input$dim.return, mean = 2, sd = 1) -->
+<!--     V <- rnorm(input$dim.return, mean = 1, sd=.1) -->
+<!--     mat <- matrix(rep(NA, input$dim.return*1000), ncol = input$dim.return) -->
+<!--     for(j in 1:input$dim.return){ -->
+<!--         mat[,j] <- rnorm(1000, E[j], V[j]) -->
+<!--     } -->
+<!--     C=cov(mat) -->
+<!--     plot(input*dim.return) -->
+
+<!-- }) -->
+<!-- ``` -->
+
+Topologiquement, nous avons dans $(E,V)$ un compact car image continue d'un simplexe. Etant compact, nous obtenons donc un bord. De plus, la paramétrisation étant différentiable car polynomiale nous avons des chances d'obtenir des coins (en fait au plus le nombre de coins du simplexe). Nous admettrons que l'on obtient une submersion d'un simplexe dans un plan.
+
+
+Voir [Mkz] "Portfolio selection" avec l'exemple à trois titres.

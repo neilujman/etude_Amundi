@@ -15,3 +15,4 @@ or simply go to:
 TODO : 
 * Vectorize the function evaluating the double integral.
 * In the nested for, make only one Riemann sum.
+* How to represent the image of a simplex parameterized by portfolio proportion.

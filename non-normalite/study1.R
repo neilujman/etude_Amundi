@@ -1,4 +1,7 @@
 library(ks)
+library(magrittr)
+library(geometry)
+
 
 # study of the rendement of the gold over 20 years
 # data from https://www.bullionvault.com/gold-price-chart.do
@@ -216,3 +219,16 @@ fval <- outer(seq(0,1,length.out = 100), seq(0,1,length.out = 50), bidon, k=10)
 
 # fun2 <- function(x,y){browser();z<-c(x,y);z[1]+z[2]}
 # outer(seq(1,5,length=5),seq(6,10,length=4),fun2)
+
+
+# -----------------------------------
+
+# ===================================
+# MARKOWITZ
+# ===================================
+
+# -----------------------------------
+
+gold.mean <- mean(gold.return.20y)
+silver.mean <- mean(silver.return.20y)
+cov.gs <- cov(cbind(gold.return.20y, silver.return.20y))
