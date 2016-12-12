@@ -9,6 +9,8 @@ and enter:
 
 https://github.com/neilujman/etude_Amundi/blob/master/non-normalite/AllocationActifsPortefeuille.html
 
+or simply go to:
+<http://htmlpreview.github.io/?https://github.com/neilujman/etude_Amundi/blob/master/non-normalite/AllocationActifsPortefeuille.html>
 
 TODO : 
 * Vectorize the function evaluating the double integral.
