@@ -126,6 +126,7 @@ closest.point <- function(x.given, y.given, x.grid, y.grid){
 }
 
 integrate.dens <- function(a, b, x.grid, y.grid, val){
+    # browser()
     nx=length(x.grid)
     ny=length(y.grid)
     ind.a <- abs(rep(a,nx)- x.grid) %>% which.min(.)
@@ -145,19 +146,10 @@ integrate.dens <- function(a, b, x.grid, y.grid, val){
 
 
 u1 <- seq(0,1, length.out = 100)[-c(1,100)]
-u2 <- seq(0,1, length.out = 100)[-c(1,100)]
+u2 <- seq(0,1, length.out = 10)[-c(1,100)]
 
 a <- quantile(gold.return.20y, probs = u1) %>% array(., dim = length(u1))
 b <- quantile(silver.return.20y, probs = u2) %>% array(., dim = length(u2))
-
-# voir pb avec outer
-#C.val <- outer(a,b, FUN = integrate.dens, x.grid=x, y.grid=y, val = val)
-
-
-bidon <- function(x,y){3*x+y}
-outer(a,b,bidon)
-
-# the nested for are long
 C.val <- matrix(rep(NA,dim(a)*dim(b)), ncol=dim(b))
 for(i in 1:dim(a)){
     for(j in 1:dim(b)){
@@ -165,4 +157,62 @@ for(i in 1:dim(a)){
     }
 }
 
-contour(C.val)
+# voir pb avec outer
+
+integrate.dens.vec <- function(a, b, x.grid, y.grid, val){
+    # browser()
+    nx=length(x.grid)
+    ny=length(y.grid)
+    # ind.a <- abs(rep(a,nx)- x.grid) %>% which.min(.)
+    # ind.b <- abs(rep(b,ny)- y.grid) %>% which.min(.)
+    ind.a <- sapply(a, function(elt){
+        abs(rep(a,nx)- x.grid) %>% which.min(.)
+    })
+    ind.b <- sapply(b, function(elt){
+        abs(rep(b,ny)- y.grid) %>% which.min(.)
+    })
+    # S is the area
+    area=outer(diff(x.grid), diff(y.grid), FUN= "*")
+    f.val <- val[,-1]
+    f.val <- f.val[-1,]
+    # non-vec : S <- sum((f.val*area)[1:ind.a,1:ind.b])
+    S <- mapply(
+        function(i,j){
+            if(i==1 || j==1){
+                return(NA) # in fact we have to treat the lower boundary, does a copula have a continuity property
+            }else{
+                i <- i-1
+                j <- j-1
+                sum((f.val*area)[1:i,1:j])
+            }
+        },
+        ind.a,
+        ind.b
+    )
+    return(S)
+}
+
+# C.val <- outer(a,b, FUN = integrate.dens.vec, x.grid=x, y.grid=y, val = val)
+
+# vars1<-c(1,2,3)
+# vars2<-c(10,20,30)
+# mult_one<-function(var1,var2)
+# {
+#     var1*var2
+# }
+# mapply(mult_one,vars1,vars2)
+
+
+bidon <- function(x,y){browser();3*x+y}
+#outer(a,b,bidon)
+
+# the nested for are long
+
+bidon <- function(x,y,k){
+    k*sin(x+y)
+}
+
+fval <- outer(seq(0,1,length.out = 100), seq(0,1,length.out = 50), bidon, k=10)
+
+# fun2 <- function(x,y){browser();z<-c(x,y);z[1]+z[2]}
+# outer(seq(1,5,length=5),seq(6,10,length=4),fun2)

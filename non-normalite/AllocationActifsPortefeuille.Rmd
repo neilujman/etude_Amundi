@@ -130,8 +130,8 @@ Dans [NAT], il est fait mention de copules page 10.
 Entamons une étude d'après l'article (en anglais) de Wikipedia.
 <https://en.wikipedia.org/wiki/Copula_(probability_theory)>
 
-Considérons la première définition donnée: "distribution multivariée pour laquelle les marginales sont uniformes".
-Fonction copule C est définie par
+Considérons la première définition donnée: "distribution multivariée pour laquelle les marginales sont uniformes".  
+La fonction copule C est définie par
 $$C(u_1,...,u_d)=\mathbb{P}\left[X_1\leq F_1^{-1}(u_1),...,X_d\leq F_d^{-1}(u_d)\right]$$
 
 Nous allons jouer avec les distributions données par le rendement de l'or et de l'argent.
@@ -149,13 +149,16 @@ Pour la probabilité conjointe, nous avons une éventuelle solution avec le pack
 L'utilisation minimaliste de la fonction ks::kde nous donne la distribution jointe suivante:
 
 ```{r echo=FALSE}
+plot(gold.return.20y,silver.return.20y, type = "p")
 plot(join.dens, main="Densité jointe estimé de l'or et de l'argent")
 ```
 
 Les contours de régions de densités à 25%, 50% et 75% sont représentées.
 
+Une incertitude demeure quant à l'évaluation de la densité conjointe: ici, nous avons consiéré l'or et l'argent évalués sur la même plage de temps. Nous avons donc mis en regard deux rendements correspondant à la même date.
 
-On peut estimer $\mathbb{P}\left[X_1\leq a, X_2\leq b\right]$ par une méthode élémentaire comme une méthode des rectangles ou du point mileu bidimensionnelle qui sera "simple" à implémenter vue que le domaine d'intégration est rectangle. L'objet issu de ks::kde nous donne le champ eval.point qui représente la grille de points d'évaluation de la densité et le champ estimate qui donne la densité évaluée sur la grille de point. Il faut aussi penser à approcher un point rendu par les quantiles par un point de la grille. Concernant ce dernier point, dans une première version de notre fonction d'intégration, cette approximation n'est pas vectorisable d'où l'usage de boucle for ou au mieux de fonction apply.
+On peut estimer $\mathbb{P}\left[X_1\leq a, X_2\leq b\right]$ par une méthode élémentaire comme une méthode des rectangles ou du point mileu bidimensionnelle qui sera "simple" à implémenter vue que le domaine d'intégration est rectangle. L'objet issu de ks::kde nous donne le champ eval.point qui représente la grille de points d'évaluation de la densité et le champ estimate qui donne la densité évaluée sur la grille de point. Il faut aussi penser à approcher un point rendu par les quantiles par un point de la grille. Concernant ce dernier point, dans une première version de notre fonction d'intégration, cette approximation n'est pas vectorisable d'où l'usage de boucle for.
+De plus, chaque itération de la double boucle recalcule les sommes de Riemann alors qu'une seule fois est nécessaire.
 
 ### Méthode du rectangle
 Notre grille construite par ks::kde (n'oublions que l'on peut jouer sur cette construction) fournira un pavage de petits rectangles $R_{ij}$. On considèrera alors le coin supérieure droit $C_{ij}$ de chaque $R_{ij}$. Ensuite, nous ferons la somme de tous les produits $f(C_{ij})*S(R_{ij})$ tel que $C_{i,j} \leq (a,b)$. 
@@ -164,10 +167,10 @@ Notre grille construite par ks::kde (n'oublions que l'on peut jouer sur cette co
 
 ### Ce que l'on veut
 A travers ces calculs, nous voulons vérifier les propriétés d'un copule, à savoir:
-??? par construction C est un copule, mais on veut quand vérifier l'uniformité de marginales.
+??? par construction C est un copule, mais on veut quand même vérifier l'uniformité de marginales.
 
 ```{r echo=FALSE}
 contour(C.val, main="Ligne de niveau de la fonction copule")
 ```
 
-Les valeurs des lignes de niveau correspondent aux marges.
+Les valeurs des lignes de niveau correspondent aux marges. Elles les suivent aux incertitudes de calculs près. 
