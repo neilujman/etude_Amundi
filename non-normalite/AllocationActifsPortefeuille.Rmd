@@ -265,8 +265,14 @@ Voir [Mkz] "Portfolio selection" avec l'exemple à trois titres.
 # Value at Risk (VaR)
 
 La VaR est une information synthétique pour la direction d'une banque.  
-Si nous disons; "Nous perdrons moins de V euros dans les N prcohaines jours avec une probabilité de X", alors la variable V est la VaR du protefeuille à N jours au seuil X.  
+Si nous disons; "Nous perdrons moins de V euros dans les N prcohaines jours avec une probabilité de X", alors la variable V est la VaR du portefeuille à N jours au seuil X.  
 Le régulateur utilise en générale $N=10$ et $X=99\%$, et s'intéresse à la perte potentielle qui sera dépassée avec une probabilité de 1%.
 Les capitaux requis sont alors au moins égaux à trois fois V selon la convention de Bâle.
 
 ![Calcul de la VaR au seuil de confiance X à partir d'une loi normale pour les variations de valeur du portefeuille](mesImages/Var_gaussienne.png)
+
+Lorsque $N$ est l'hotizon, $X$ le seuil de confiance, la VaR est le $100(1-X)$ centile de la distribution de probabilité des variations de valeur du portefeuille dans les $N$ jours à venir.
+
+On calcule en général pour $N=1$, et on utilise
+$$ V(N;X)=V(1;X)*\sqrt{N}$$
+formule exacte quand la distribution est gaussienne.
